@@ -36,18 +36,18 @@
       return;
     }
     try {
-      const optionsResponse = await axios.post('/register/options', { username, displayName });
-      const options = transformCreateOptions(optionsResponse.data);
+      const optionsResponse = await postJson('/register/options', { username, displayName });
+      const options = transformCreateOptions(optionsResponse);
       const credential = await navigator.credentials.create(options);
       const payload = serializeRegistration(credential, { username, displayName });
-      const verifyResponse = await axios.post('/register/verify', payload, { headers: { 'Content-Type': 'application/json' } });
-      if (verifyResponse.data.verified) {
+      const verifyResponse = await postJson('/register/verify', payload);
+      if (verifyResponse.verified) {
         window.location.href = '{{ url_for('dashboard') }}';
       }
     } catch (error) {
       console.error(error);
       const fallback = '登録に失敗しました。ブラウザが WebAuthn に対応しているか確認してください。';
-      const message = error.response?.data?.error || error.message || error?.toString();
+      const message = error.responseData?.error || error.message || error?.toString();
       messageEl.textContent = message || fallback;
     }
   });
