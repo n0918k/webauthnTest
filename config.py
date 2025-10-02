@@ -11,9 +11,9 @@ class Config:
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SESSION_COOKIE_SECURE = False
     PERMANENT_SESSION_LIFETIME = timedelta(hours=1)
-    WEBAUTHN_RP_ID = os.environ.get("WEBAUTHN_RP_ID", "localhost")
+    WEBAUTHN_RP_ID = os.environ.get("WEBAUTHN_RP_ID")
     WEBAUTHN_RP_NAME = os.environ.get("WEBAUTHN_RP_NAME", "WebAuthn Demo")
-    WEBAUTHN_ORIGIN = os.environ.get("WEBAUTHN_ORIGIN", "http://localhost:8000")
+    WEBAUTHN_ORIGIN = os.environ.get("WEBAUTHN_ORIGIN")
 
 
 class TestConfig(Config):

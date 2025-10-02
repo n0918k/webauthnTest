@@ -46,7 +46,9 @@
       }
     } catch (error) {
       console.error(error);
-      messageEl.textContent = error.response?.data?.error || '登録に失敗しました。ブラウザが WebAuthn に対応しているか確認してください。';
+      const fallback = '登録に失敗しました。ブラウザが WebAuthn に対応しているか確認してください。';
+      const message = error.response?.data?.error || error.message || error?.toString();
+      messageEl.textContent = message || fallback;
     }
   });
 </script>
