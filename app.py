@@ -1,7 +1,7 @@
 import base64
 import json
 from datetime import datetime
-from typing import List, Optional
+from typing import List, Optional, Type
 from uuid import uuid4
 
 from flask import (
@@ -28,12 +28,16 @@ from webauthn.helpers.exceptions import InvalidAuthenticationResponse, InvalidRe
 from webauthn.helpers.structs import (
     AuthenticationCredential,
     AuthenticatorSelectionCriteria,
-    AuthenticatorTransport,
     PublicKeyCredentialDescriptor,
     RegistrationCredential,
     ResidentKeyRequirement,
     UserVerificationRequirement,
 )
+
+try:
+    from webauthn.helpers.structs import AuthenticatorTransport
+except ImportError:  # pragma: no cover - 古いバージョンの互換性確保
+    AuthenticatorTransport = None
 
 
 db = SQLAlchemy()
@@ -109,7 +113,7 @@ class ChallengeSession:
         session.pop(ChallengeSession.user_handle_key, None)
 
 
-def create_app(config_class: type[Config] = Config) -> Flask:
+def create_app(config_class: Type[Config] = Config) -> Flask:
     app = Flask(__name__)
     app.config.from_object(config_class)
     db.init_app(app)
@@ -225,7 +229,9 @@ def create_app(config_class: type[Config] = Config) -> Flask:
         public_key = base64.b64encode(verification.credential_public_key).decode("utf-8")
         transports = None
         if credential.response.transports:
-            transports = ",".join(t.value for t in credential.response.transports)
+            transports = ",".join(
+                getattr(t, "value", t) for t in credential.response.transports
+            )
 
         existing_credential = Credential.query.filter_by(credential_id=credential_id).first()
         if existing_credential:
@@ -262,9 +268,9 @@ def create_app(config_class: type[Config] = Config) -> Flask:
 
         allow_credentials = []
         for cred in user.credentials:
-            transports = (
-                [AuthenticatorTransport(t) for t in cred.transports.split(",")] if cred.transports else None
-            )
+            transports = None
+            if cred.transports and AuthenticatorTransport:
+                transports = [AuthenticatorTransport(t) for t in cred.transports.split(",")]
             allow_credentials.append(
                 PublicKeyCredentialDescriptor(
                     id=base64.urlsafe_b64decode(cred.credential_id.encode("utf-8")),
