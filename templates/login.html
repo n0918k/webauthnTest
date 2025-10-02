@@ -31,17 +31,17 @@
       return;
     }
     try {
-      const optionsResponse = await axios.post('/login/options', { username });
-      const options = transformRequestOptions(optionsResponse.data);
+      const optionsResponse = await postJson('/login/options', { username });
+      const options = transformRequestOptions(optionsResponse);
       const assertion = await navigator.credentials.get(options);
       const payload = serializeAuthentication(assertion);
-      const verifyResponse = await axios.post('/login/verify', payload, { headers: { 'Content-Type': 'application/json' } });
-      if (verifyResponse.data.verified) {
+      const verifyResponse = await postJson('/login/verify', payload);
+      if (verifyResponse.verified) {
         window.location.href = '{{ url_for('dashboard') }}';
       }
     } catch (error) {
       console.error(error);
-      messageEl.textContent = error.response?.data?.error || '認証に失敗しました。ブラウザが WebAuthn に対応しているか確認してください。';
+      messageEl.textContent = error.responseData?.error || error.message || '認証に失敗しました。ブラウザが WebAuthn に対応しているか確認してください。';
     }
   });
 </script>

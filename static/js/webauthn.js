@@ -72,7 +72,35 @@ function serializeAuthentication(assertion) {
   };
 }
 
+async function postJson(url, body) {
+  const response = await fetch(url, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    credentials: 'same-origin',
+    body: JSON.stringify(body),
+  });
+
+  const contentType = response.headers.get('content-type') || '';
+  const isJson = contentType.includes('application/json');
+  const payload = isJson ? await response.json() : await response.text();
+
+  if (!response.ok) {
+    const message =
+      (isJson && payload && typeof payload === 'object' && payload.error) ||
+      `Request failed with status ${response.status}`;
+    const error = new Error(message);
+    error.status = response.status;
+    error.responseData = payload;
+    throw error;
+  }
+
+  return payload;
+}
+
 window.transformCreateOptions = transformCreateOptions;
 window.transformRequestOptions = transformRequestOptions;
 window.serializeRegistration = serializeRegistration;
 window.serializeAuthentication = serializeAuthentication;
+window.postJson = postJson;

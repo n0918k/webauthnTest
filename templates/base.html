@@ -21,7 +21,6 @@
     <main class="container py-5">
       {% block content %}{% endblock %}
     </main>
-    <script src="https://cdn.jsdelivr.net/npm/axios@1.6.7/dist/axios.min.js" integrity="sha384-pTS5fV2Z6kGgREjA5Xjq5ygXSubn5s0gxq/F1b8Wz8tPh7HsqaDU8StGIC2xLquH" crossorigin="anonymous"></script>
     <script src="{{ url_for('static', filename='js/webauthn.js') }}"></script>
     {% block scripts %}{% endblock %}
   </body>
