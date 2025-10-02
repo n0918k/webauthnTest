@@ -1,0 +1,12 @@
+body {
+  min-height: 100vh;
+}
+
+.card {
+  border: none;
+}
+
+#register-message,
+#login-message {
+  min-height: 1.5rem;
+}
