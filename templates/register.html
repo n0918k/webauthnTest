@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+{% block title %}登録 | WebAuthn Demo{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-md-6">
+    <div class="card shadow-sm">
+      <div class="card-body">
+        <h2 class="card-title h4 mb-4">セキュアな FIDO2 認証を登録</h2>
+        <div class="mb-3">
+          <label class="form-label" for="register-username">ユーザー名</label>
+          <input id="register-username" type="text" class="form-control" placeholder="例: yamada" autocomplete="username">
+        </div>
+        <div class="mb-3">
+          <label class="form-label" for="register-display-name">表示名</label>
+          <input id="register-display-name" type="text" class="form-control" placeholder="例: 山田太郎" autocomplete="name">
+        </div>
+        <div class="d-grid gap-2">
+          <button id="register-button" class="btn btn-success">セキュリティキーを登録</button>
+          <a href="{{ url_for('login_page') }}" class="btn btn-outline-secondary">すでにアカウントをお持ちの方はこちら</a>
+        </div>
+        <div id="register-message" class="mt-3 text-danger"></div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+  document.getElementById('register-button').addEventListener('click', async () => {
+    const username = document.getElementById('register-username').value.trim();
+    const displayName = document.getElementById('register-display-name').value.trim();
+    const messageEl = document.getElementById('register-message');
+    messageEl.textContent = '';
+    if (!username || !displayName) {
+      messageEl.textContent = 'ユーザー名と表示名を入力してください';
+      return;
+    }
+    try {
+      const optionsResponse = await axios.post('/register/options', { username, displayName });
+      const options = transformCreateOptions(optionsResponse.data);
+      const credential = await navigator.credentials.create(options);
+      const payload = serializeRegistration(credential, { username, displayName });
+      const verifyResponse = await axios.post('/register/verify', payload, { headers: { 'Content-Type': 'application/json' } });
+      if (verifyResponse.data.verified) {
+        window.location.href = '{{ url_for('dashboard') }}';
+      }
+    } catch (error) {
+      console.error(error);
+      messageEl.textContent = error.response?.data?.error || '登録に失敗しました。ブラウザが WebAuthn に対応しているか確認してください。';
+    }
+  });
+</script>
+{% endblock %}
