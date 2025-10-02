@@ -46,16 +46,11 @@ db = SQLAlchemy()
 
 class User(db.Model):
     __tablename__ = "users"
-    __table_args__ = (
-        db.UniqueConstraint(
-            "user_handle", name="uq_users_user_handle", mysql_length=64
-        ),
-    )
 
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(64), unique=True, nullable=False)
     display_name = db.Column(db.String(128), nullable=False)
-    user_handle = db.Column(BINARY(64), nullable=False, index=True)
+    user_handle = db.Column(BINARY(64), unique=True, nullable=False, index=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     credentials = relationship("Credential", back_populates="user", cascade="all, delete-orphan")
