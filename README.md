@@ -36,7 +36,7 @@ FLUSH PRIVILEGES;
 DATABASE_URI=mysql+pymysql://<user>:<password>@<host>:<port>/<database>
 SECRET_KEY=ランダムな文字列
 WEBAUTHN_RP_ID=localhost
-WEBAUTHN_ORIGIN=http://localhost:5000
+WEBAUTHN_ORIGIN=http://localhost:8000
 WEBAUTHN_RP_NAME=WebAuthn Demo
 ```
 
@@ -44,10 +44,10 @@ WEBAUTHN_RP_NAME=WebAuthn Demo
 
 ```bash
 export FLASK_APP=app:create_app
-flask run --host=0.0.0.0 --port=5000
+flask run --host=0.0.0.0 --port=8000
 ```
 
-起動後、ブラウザで `http://localhost:5000` にアクセスして登録・ログインを試してください。
+起動後、ブラウザで `http://localhost:8000` にアクセスして登録・ログインを試してください。
 
 ## ディレクトリ構成
 
