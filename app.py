@@ -128,6 +128,28 @@ def create_app(config_class: Type[Config] = Config) -> Flask:
             return redirect(url_for("dashboard"))
         return redirect(url_for("login_page"))
 
+    def _rp_id() -> str:
+        configured = app.config.get("WEBAUTHN_RP_ID")
+        if configured:
+            return configured
+
+        host = request.host.split(":")[0]
+        if host == "0.0.0.0":
+            return "localhost"
+        return host
+
+    def _expected_origins() -> List[str]:
+        origins: List[str] = []
+        configured = app.config.get("WEBAUTHN_ORIGIN")
+        if configured:
+            origins.append(configured.rstrip("/"))
+
+        request_origin = f"{request.scheme}://{request.host}".rstrip("/")
+        if request_origin not in origins:
+            origins.append(request_origin)
+
+        return origins
+
     @app.route("/register", methods=["GET"])
     def register_page():
         return render_template("register.html")
@@ -172,7 +194,7 @@ def create_app(config_class: Type[Config] = Config) -> Flask:
             exclude_credentials = []
 
         options = generate_registration_options(
-            rp_id=app.config["WEBAUTHN_RP_ID"],
+            rp_id=_rp_id(),
             rp_name=app.config["WEBAUTHN_RP_NAME"],
             user_id=user_handle,
             user_name=username,
@@ -198,8 +220,8 @@ def create_app(config_class: Type[Config] = Config) -> Flask:
             verification = verify_registration_response(
                 credential=credential,
                 expected_challenge=challenge,
-                expected_rp_id=app.config["WEBAUTHN_RP_ID"],
-                expected_origin=app.config["WEBAUTHN_ORIGIN"],
+                expected_rp_id=_rp_id(),
+                expected_origin=_expected_origins(),
                 require_user_verification=True,
             )
         except InvalidRegistrationResponse as exc:
@@ -281,7 +303,7 @@ def create_app(config_class: Type[Config] = Config) -> Flask:
             )
 
         options = generate_authentication_options(
-            rp_id=app.config["WEBAUTHN_RP_ID"],
+            rp_id=_rp_id(),
             allow_credentials=allow_credentials,
             user_verification=UserVerificationRequirement.PREFERRED,
         )
@@ -315,8 +337,8 @@ def create_app(config_class: Type[Config] = Config) -> Flask:
             verification = verify_authentication_response(
                 credential=credential,
                 expected_challenge=challenge,
-                expected_rp_id=app.config["WEBAUTHN_RP_ID"],
-                expected_origin=app.config["WEBAUTHN_ORIGIN"],
+                expected_rp_id=_rp_id(),
+                expected_origin=_expected_origins(),
                 credential_public_key=base64.b64decode(stored_credential.public_key.encode("utf-8")),
                 credential_current_sign_count=stored_credential.sign_count,
                 require_user_verification=True,
