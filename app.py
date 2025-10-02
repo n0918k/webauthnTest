@@ -14,6 +14,7 @@ from flask import (
     url_for,
 )
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy.dialects.mysql import BINARY
 from sqlalchemy.orm import relationship
 
 from config import Config
@@ -54,7 +55,7 @@ class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(64), unique=True, nullable=False)
     display_name = db.Column(db.String(128), nullable=False)
-    user_handle = db.Column(db.LargeBinary(64), nullable=False, index=True)
+    user_handle = db.Column(BINARY(64), nullable=False, index=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     credentials = relationship("Credential", back_populates="user", cascade="all, delete-orphan")
