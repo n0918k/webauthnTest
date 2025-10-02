@@ -126,7 +126,7 @@ def create_app(config_class: Type[Config] = Config) -> Flask:
     def index():
         if session.get("user_id"):
             return redirect(url_for("dashboard"))
-        return redirect(url_for("login"))
+        return redirect(url_for("login_page"))
 
     @app.route("/register", methods=["GET"])
     def register_page():
@@ -140,14 +140,14 @@ def create_app(config_class: Type[Config] = Config) -> Flask:
     def dashboard():
         user_id = session.get("user_id")
         if not user_id:
-            return redirect(url_for("login"))
+            return redirect(url_for("login_page"))
         user = User.query.get(user_id)
         return render_template("dashboard.html", user=user)
 
     @app.route("/logout")
     def logout():
         session.clear()
-        return redirect(url_for("login"))
+        return redirect(url_for("login_page"))
 
     @app.route("/register/options", methods=["POST"])
     def register_options():
@@ -338,4 +338,4 @@ def create_app(config_class: Type[Config] = Config) -> Flask:
 
 if __name__ == "__main__":
     application = create_app()
-    application.run(host="0.0.0.0", port=5000, debug=True)
+    application.run(host="0.0.0.0", port=8000, debug=True)
