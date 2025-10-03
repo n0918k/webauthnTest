@@ -193,10 +193,12 @@ def create_app(config_class: Type[Config] = Config) -> Flask:
             user_handle = uuid4().bytes
             exclude_credentials = []
 
+        user_id_str = base64.urlsafe_b64encode(user_handle).decode("utf-8")
+
         options = generate_registration_options(
             rp_id=_rp_id(),
             rp_name=app.config["WEBAUTHN_RP_NAME"],
-            user_id=user_handle,
+            user_id=user_id_str,
             user_name=username,
             user_display_name=display_name,
             authenticator_selection=AuthenticatorSelectionCriteria(
