@@ -35,8 +35,8 @@ FLUSH PRIVILEGES;
 ```dotenv
 DATABASE_URI=mysql+pymysql://<user>:<password>@<host>:<port>/<database>
 SECRET_KEY=ランダムな文字列
-WEBAUTHN_RP_ID=example.com        # 省略するとアクセスしているホストから自動判定します
-WEBAUTHN_ORIGIN=https://example.com  # 省略するとリクエストのオリジンを許可します
+WEBAUTHN_RP_ID=localhost           # 省略するとアクセスしているホストから自動判定します
+WEBAUTHN_ORIGIN=http://localhost:8000  # 省略するとリクエストのオリジンを許可します
 WEBAUTHN_RP_NAME=WebAuthn Demo
 ```
 
