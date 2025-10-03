@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+{% block title %}ログイン | WebAuthn Demo{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-md-6">
+    <div class="card shadow-sm">
+      <div class="card-body">
+        <h2 class="card-title h4 mb-4">パスワードレスログイン</h2>
+        <div class="mb-3">
+          <label class="form-label" for="login-username">ユーザー名</label>
+          <input id="login-username" type="text" class="form-control" placeholder="例: yamada" autocomplete="username">
+        </div>
+        <div class="d-grid gap-2">
+          <button id="login-button" class="btn btn-primary">FIDO2 でログイン</button>
+          <a href="{{ url_for('register_page') }}" class="btn btn-outline-secondary">新規登録はこちら</a>
+        </div>
+        <div id="login-message" class="mt-3 text-danger"></div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+  document.getElementById('login-button').addEventListener('click', async () => {
+    const username = document.getElementById('login-username').value.trim();
+    const messageEl = document.getElementById('login-message');
+    messageEl.textContent = '';
+    if (!username) {
+      messageEl.textContent = 'ユーザー名を入力してください';
+      return;
+    }
+    try {
+      const optionsResponse = await postJson('/login/options', { username });
+      const options = transformRequestOptions(optionsResponse);
+      const assertion = await navigator.credentials.get(options);
+      const payload = serializeAuthentication(assertion);
+      const verifyResponse = await postJson('/login/verify', payload);
+      if (verifyResponse.verified) {
+        window.location.href = '{{ url_for('dashboard') }}';
+      }
+    } catch (error) {
+      console.error(error);
+      messageEl.textContent = error.responseData?.error || error.message || '認証に失敗しました。ブラウザが WebAuthn に対応しているか確認してください。';
+    }
+  });
+</script>
+{% endblock %}
