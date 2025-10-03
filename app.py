@@ -1,5 +1,6 @@
 import base64
 import json
+from urllib.parse import urlsplit, urlunsplit
 from datetime import datetime
 from typing import List, Optional, Type
 from uuid import uuid4
@@ -122,6 +123,22 @@ def create_app(config_class: Type[Config] = Config) -> Flask:
     with app.app_context():
         db.create_all()
 
+    @app.before_request
+    def ensure_valid_host():
+        host = request.host
+        if host.startswith("0.0.0.0"):
+            parts = urlsplit(request.url)
+            port = ""
+            if ":" in host:
+                port = host.split(":", 1)[1]
+            redirect_host = "localhost"
+            if port:
+                redirect_host = f"{redirect_host}:{port}"
+            new_url = urlunsplit(
+                (parts.scheme, redirect_host, parts.path, parts.query, parts.fragment)
+            )
+            return redirect(new_url, code=307)
+
     @app.route("/")
     def index():
         if session.get("user_id"):
@@ -147,6 +164,18 @@ def create_app(config_class: Type[Config] = Config) -> Flask:
         request_origin = f"{request.scheme}://{request.host}".rstrip("/")
         if request_origin not in origins:
             origins.append(request_origin)
+
+        rp_id = _rp_id()
+        if ":" in request.host:
+            port = request.host.split(":", 1)[1]
+        else:
+            port = ""
+        rp_origin = f"{request.scheme}://{rp_id}"
+        if port:
+            rp_origin = f"{rp_origin}:{port}"
+        rp_origin = rp_origin.rstrip("/")
+        if rp_origin not in origins:
+            origins.append(rp_origin)
 
         return origins
 
