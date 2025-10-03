@@ -210,7 +210,7 @@ def create_app(config_class: Type[Config] = Config) -> Flask:
         )
 
         ChallengeSession.store(options.challenge, username, display_name, user_handle)
-        return jsonify(json.loads(options.model_dump_json()))
+        return jsonify(json.loads(options.model_dump_json(by_alias=True)))
 
     @app.route("/register/verify", methods=["POST"])
     def register_verify():
@@ -313,7 +313,7 @@ def create_app(config_class: Type[Config] = Config) -> Flask:
         ChallengeSession.store_authentication(options.challenge)
         session["login_username"] = username
 
-        return jsonify(json.loads(options.model_dump_json()))
+        return jsonify(json.loads(options.model_dump_json(by_alias=True)))
 
     @app.route("/login/verify", methods=["POST"])
     def login_verify():
